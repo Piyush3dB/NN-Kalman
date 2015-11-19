@@ -81,8 +81,14 @@ ffnnObj = ffnn(1, nh, 1);
 T2 = N/2+1:N;
 for k = T2
     
+    % Restructure weights and biases
+    Wxh = W1(:, 1);
+    bh  = W1(:, 2+zeros(1,Ns));
+    Why = W2(:, 1:nh);
+    bo  = W2(:, nh+ones(1,Ns));
+    
     % Configure weights
-    ffnnObj = ffnnObj.setWets(W1, W2, Ns);
+    ffnnObj = ffnnObj.setWets(Wxh, bh, Why, bo);
     
     % Feed forward
     ffnnObj = ffnnObj.step(x(k,:));
@@ -107,7 +113,7 @@ title('testing results');
 
 z(end,end)
 
-% z(end, end)
+% z(end)
 % ans =
 %   -0.7820
    

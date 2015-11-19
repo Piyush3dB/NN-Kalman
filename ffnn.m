@@ -22,19 +22,8 @@ classdef ffnn
             obj.ny = ny;
         end
         
-        function obj = setWets(obj, theta, Ns)
+        function obj = setWets(obj, Wxh, bh, Why, bo)
             
-            nh = obj.nh;
-            
-            % Restructure reained weights
-            W1 = reshape( theta(     1:nh*2), nh, [] );
-            W2 = reshape( theta(nh*2+1:end ), 1 , [] );
-            
-            % Restructure weights and biases
-            Wxh = W1(:, 1);
-            bh  = W1(:, 2+zeros(1,Ns));
-            Why = W2(:, 1:obj.nh);
-            bo  = W2(:, obj.nh+ones(1,Ns));
             
             obj.Wxh = Wxh;
             obj.bh  = bh;
@@ -43,8 +32,6 @@ classdef ffnn
         end
         
         function obj = step(obj, xx)
-            
-            obj.
             
             % Input to hidden. Transform each input sample to
             % a number of hidden samples
