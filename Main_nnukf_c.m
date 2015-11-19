@@ -39,18 +39,19 @@ R = 100.0000 * eye(Ns);
 
 
 %% NN
-nnObj = c_nnukf(Q, R);
-nnObj = nnObj.init(theta, P);
+nnukfObj = c_nnukf(Q, R);
+nnukfObj = nnukfObj.init(theta, P);
 
 %% Training model
 T1 = 1:N/2;
+
 for k = T1
-    [theta, P, z(k,:)] = nnukf(theta, P, x(k,:), y(k,:), Q, R);
+
+    nnukfObj = nnukfObj.step(x(k,:), y(k,:));
+    theta = nnukfObj.x;
+    P     = nnukfObj.P;
+    z(k,:)= nnukfObj.e;
     
-    nnObj = nnObj.step(x(k,:), y(k,:));
-    theta = nnObj.x;
-    P     = nnObj.P;
-    z(k,:)= nnObj.e;
 end
 
 %% Test model
