@@ -47,10 +47,13 @@ T1 = 1:N/2;
 
 for k = T1
 
+    % Correct weights
     nnukfObj = nnukfObj.step(x(k,:), y(k,:));
     theta = nnukfObj.x;
     P     = nnukfObj.P;
-    z(k,:)= nnukfObj.e;
+    
+    % Run net and retrieve outputs
+    z(k,:)= nnukfObj.ukfObj.hmeas(theta);
     
 end
 

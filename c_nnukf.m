@@ -79,13 +79,16 @@ classdef c_nnukf
             
             % Measurement Equation
             h = @(u) obj.nn( u, input, size(output,1) );
+            obj.ukfObj.hmeas = h;
             
             % Run UKF
-            obj.ukfObj.hmeas = h;
             obj.ukfObj = obj.ukfObj.step(output(:));
-            % Calc e
+            
+            % Retrieve newly estimated parameters
             obj.x = obj.ukfObj.x;
             obj.P = obj.ukfObj.P;
+            
+            % Calculate net output using new weights
             obj.e = h(obj.ukfObj.x);
             
         end
