@@ -72,38 +72,23 @@ end
 W1 = reshape( theta(     1:nh*2), nh, [] );
 W2 = reshape( theta(nh*2+1:end ), 1 , [] );
 
+
+ffnnObj = ffnn(1, nh, 1);
+
 % Select training set and run
 % Each input sample produces one output sample
 % 'Ns' in 'Ns' out
 T2 = N/2+1:N;
 for k = T2
     
-    % Input data
-    xx  = x(k,:);
+    % Configure weights
+    ffnnObj = ffnnObj.setWets(W1, W2, Ns);
     
-    % Input to hidden weights and biases
-    % 1. First column is weights
-    % 2. Second column is bias. Replicate 'Ns' number of times. 
-    Wxh = W1(:, 1);
-    bh  = W1(:, 2+zeros(1,Ns));
-    
-    % Hidden to output weights and biases
-    % 1. First column is weights
-    % 2. Second column is bias. Replicate 'Ns' number of times.
-    Why = W2(:, 1:nh);
-    bo  = W2(:, nh+ones(1,Ns));
-    
-    % Input to hidden. Transform each input sample to 
-    % a number of hidden samples
-    h_tp1_ = Wxh * xx + bh;
-    h_tp1  = tanh(h_tp1_);
-    
-    % Hidden to output. Transform a number of hidden samples
-    % to an output sample
-    yy = Why * h_tp1 + bo;
+    % Feed forward
+    ffnnObj = ffnnObj.step(x(k,:));
     
     % Output data
-    z(k,:) = yy;
+    z(k,:) = ffnnObj.output;
     
 end
 
@@ -120,9 +105,9 @@ plot(x(T2,:),y(T2,:),'ob');
 plot(x(T2,:),z(T2,:),'.r');
 title('testing results');
 
-yy(end)
+z(end,end)
 
-% yy(end)
+% z(end, end)
 % ans =
 %   -0.7820
    

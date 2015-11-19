@@ -76,7 +76,7 @@ function X=sigmas(x,P,c)
 %Output:
 %       X: Sigma points
 
-N = numel(x)
+N = numel(x);
 A = c*chol(P)';
 Y = x(:,ones(1,N));
 X = [x Y+A Y-A]; 

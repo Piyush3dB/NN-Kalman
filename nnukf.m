@@ -1,7 +1,7 @@
-function [theta,P,e]=nnukf(theta,P,x,y,Q,R)
+function [x,P,e]=nnukf(x, P, input, output, Q, R)
 % NNUKF     A function using the UKF to training a MLP NN
 %
-% [theta,P,z]=nnukf(theta,P,x,y,Q,R) searches the optimal parameters, 
+% [theta,P,z]=nnukf(theta,P,x,y,Q,R) searches the optimal parameters,
 %
 % - theta
 % of a MLP NN based on a set of training data with input x and output y.
@@ -9,20 +9,20 @@ function [theta,P,e]=nnukf(theta,P,x,y,Q,R)
 % Input:
 %   - theta: initial guess of MLP NN parameter. The network structure is
 %
-%   - ns : number of parameters network parameters, 
+%   - ns : number of parameters network parameters,
 %   - nx : the number of inputs (size of x),
 %   - ny : the number of output (size of y)
 %
-% The equation of the NN is: 
-% 
-%   y     = W2 * tanh( W1 * x + b1) + b2, and 
-%   theta = [W1(:);b1;W2(:);b2].
+% The equation of the NN is:
+%
+%   y     = W2 * tanh( W1 * x + b1) + b2, and
+%   theta = [W1(:) ; b1 ; W2(:) ; b2].
 %
 % Therefore,
 %
-%   ns = nx * nh + nh + nh * ny + ny, 
+%   ns = nx * nh + nh + nh * ny + ny,
 %
-% which gives the number of hidden nodes is 
+% which gives the number of hidden nodes is
 %
 %   nh = (ns - ny) / (nx + ny + 1);
 %
@@ -41,42 +41,47 @@ function [theta,P,e]=nnukf(theta,P,x,y,Q,R)
 f = @(u)u;
 
 % Measurement Equation
-h = @(u)nn(u,x,size(y,1));
+h = @(u) nn( u, input, size(output,1) );
 
 % UKF
-[theta,P] = ukf(f,theta,P,h,y(:),Q,R);
+[x, P] = ukf(f, x, P, h, output(:), Q, R);
 
-e = h(theta);
+e = h(x);
 
 
-function y=nn(theta,x,ny)
+function y=nn(x,input,ny)
 
-% The equation of the NN is: 
-% 
-%   y     = Why * tanh( Wxh * x + bh) + bo, and 
+% The equation of the NN is:
+%
+%   y     = Why * tanh( Wxh * x + bh) + bo, and
 %   theta = [ Wxh(:) ; b1 ; Why(:) ; bo ].
 %
 % Therefore,
 %
-%   ns = nx * nh + nh + nh * ny + ny, 
+%   ns = nx * nh + nh + nh * ny + ny,
 %
-% which gives the number of hidden nodes is 
+% which gives the number of hidden nodes is
 %
 %   nh = (ns - ny) / (nx + ny + 1);
 
-[nx,N] = size(x);
+[nx,N] = size(input);
 
-ns = numel(theta);
+ns = numel(x);
 nh = (ns-ny)/(nx+ny+1);
 
-W1 = reshape(theta(1:nh*(nx+1)),nh,[]);
+W1 = reshape(x(1:nh*(nx+1)),nh,[]);
 Wxh = W1(:,1:nx);
 bh  = W1(:,nx+ones(1,N));
 
-W2 = reshape(theta(nh*(nx+1)+1:end),ny,[]);
+W2 = reshape(x(nh*(nx+1)+1:end),ny,[]);
 Why = W2(:,1:nh);
 bo  = W2(:,nh+ones(1,N));
 
-y  =  Why * tanh( Wxh*x + bh ) + bo;
+% Input to hidden
+h_tp1 = tanh(Wxh * input + bh);
+
+% Hidden to output
+y = Why * h_tp1 + bo;
+
 y  = y(:);
 
